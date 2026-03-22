@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Link } from "@tanstack/react-router";
-import { useState, type SubmitEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 export type SignInForm = {
   username: string;
@@ -20,15 +20,15 @@ export function LoginForm({
   className,
   onSubmit,
   ...props
-}: React.ComponentProps<"form"> & {
-  onSubmit: (event: SubmitEvent<HTMLFormElement>, data: SignInForm) => Promise<string | null>;
+}: Omit<React.ComponentProps<"form">, "onSubmit"> & {
+  onSubmit: (event: FormEvent<HTMLFormElement>, data: SignInForm) => Promise<string | null>;
 }) {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     setError(null);
     setLoading(true);
     const err = await onSubmit(event, { username, password });

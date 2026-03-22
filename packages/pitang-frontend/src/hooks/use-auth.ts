@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import type { SignInForm } from "@/components/login-form";
-import { useEffect, useState, type SubmitEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { LoggedUser } from "@/types";
 
 const baseURL = "https://dummyjson.com";
@@ -45,7 +45,7 @@ export function useAuth() {
   }
 
   async function handleLogin(
-    event: SubmitEvent<HTMLFormElement>,
+    event: FormEvent<HTMLFormElement>,
     data: SignInForm,
   ): Promise<string | null> {
     event.preventDefault();
