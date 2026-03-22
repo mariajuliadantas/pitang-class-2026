@@ -21,16 +21,26 @@ export function LoginForm({
   onSubmit,
   ...props
 }: React.ComponentProps<"form"> & {
-  onSubmit: (event: SubmitEvent<HTMLFormElement>, data: SignInForm) => void;
+  onSubmit: (event: SubmitEvent<HTMLFormElement>, data: SignInForm) => Promise<string | null>;
 }) {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    setError(null);
+    setLoading(true);
+    const err = await onSubmit(event, { username, password });
+    if (err) setError(err);
+    setLoading(false);
+  }
 
   return (
     <form
       {...props}
       className={cn("flex flex-col gap-6", className)}
-      onSubmit={(event) => onSubmit(event, { username, password })}
+      onSubmit={handleSubmit}
     >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
@@ -39,6 +49,13 @@ export function LoginForm({
             Enter your username below to login to your account
           </p>
         </div>
+
+        {error && (
+          <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive text-center">
+            {error}
+          </div>
+        )}
+
         <Field>
           <FieldLabel htmlFor="username">username</FieldLabel>
           <Input
@@ -70,7 +87,9 @@ export function LoginForm({
           />
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Signing in…" : "Login"}
+          </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>

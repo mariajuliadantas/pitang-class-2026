@@ -13,39 +13,41 @@ function getCookie(cookieName: string) {
     ?.split("=")[1];
 }
 
+export async function getAuthenticatedUser(): Promise<LoggedUser | null> {
+  const token = getCookie("@pitang/accessToken");
+  if (!token) return null;
+
+  const response = await fetch(`${baseURL}/auth/me`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) return null;
+  return response.json();
+}
+
 export function useAuth() {
   const [loggedUser, setLoggedUser] = useState<LoggedUser | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function getAuthenticatedUser() {
-      const response = await fetch("https://dummyjson.com/auth/me", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${getCookie("@pitang/accessToken")}`,
-        },
-      });
-
-      if (!response.ok) {
-        return toast.error("Something went wrong");
-      }
-
-      setLoggedUser(await response.json());
-    }
-
-    getAuthenticatedUser();
+    getAuthenticatedUser().then((user) => {
+      if (!user) return toast.error("Something went wrong");
+      setLoggedUser(user);
+    });
   }, []);
 
   async function handleLogout() {
     document.cookie = "@pitang/accessToken=; path=/; Max-Age=0";
-
     navigate({ to: "/login" });
   }
 
   async function handleLogin(
     event: SubmitEvent<HTMLFormElement>,
     data: SignInForm,
-  ) {
+  ): Promise<string | null> {
     event.preventDefault();
 
     const response = await fetch(`${baseURL}/auth/login`, {
@@ -61,7 +63,7 @@ export function useAuth() {
     const json = await response.json();
 
     if (!response.ok) {
-      return toast.error(json.message);
+      return json.message ?? "Invalid username or password.";
     }
 
     toast.success("Welcome...");
@@ -69,6 +71,7 @@ export function useAuth() {
     document.cookie = `@pitang/accessToken=${json.accessToken}; path=/; Max-Age=86400`;
 
     navigate({ to: "/dashboard" });
+    return null;
   }
 
   return {

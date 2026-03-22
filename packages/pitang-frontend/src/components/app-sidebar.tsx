@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "@tanstack/react-router";
 
 import { NavProjects } from "@/components/nav-projects";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -12,35 +13,41 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { FrameIcon, PieChartIcon, MapIcon, TerminalIcon, PackageIcon } from "lucide-react";
+import {
+  FrameIcon,
+  PieChartIcon,
+  MapIcon,
+  TerminalIcon,
+  PackageIcon,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 const data = {
-  navMain: [],
   navSecondary: [],
   projects: [
     {
       name: "Dashboard",
-      url: "/dashboard",
+      url: "/dashboard" as const,
       icon: <PieChartIcon />,
     },
     {
       name: "Products",
-      url: "/dashboard/products",
+      url: "/dashboard/products/" as const,
       icon: <PackageIcon />,
     },
     {
       name: "Users",
-      url: "/dashboard/users",
+      url: "/dashboard" as const,
       icon: <MapIcon />,
     },
     {
       name: "Todos",
-      url: "/dashboard/todos",
+      url: "/dashboard" as const,
       icon: <FrameIcon />,
     },
   ],
 };
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { loggedUser, handleLogout } = useAuth();
 
@@ -49,7 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<a href="#" />}>
+            <SidebarMenuButton size="lg" render={<Link to="/dashboard" />}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <TerminalIcon className="size-4" />
               </div>
@@ -75,7 +82,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           user={{
             avatar: loggedUser?.image || "",
             email: loggedUser?.email || "",
-            name: `${loggedUser?.firstName} ${loggedUser?.lastName}` || "",
+            name:
+              `${loggedUser?.firstName} ${loggedUser?.lastName}`.trim() || "",
           }}
         />
       </SidebarFooter>

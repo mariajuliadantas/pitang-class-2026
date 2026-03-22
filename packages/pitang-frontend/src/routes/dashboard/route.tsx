@@ -1,9 +1,14 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useLocation,
+} from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -15,14 +20,18 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Fragment } from "react/jsx-runtime";
+import { getAuthenticatedUser } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/dashboard")({
+  beforeLoad: async () => {
+    const user = await getAuthenticatedUser();
+    if (!user) throw redirect({ to: "/login" });
+  },
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const location = useLocation();
-
   const paths = location.pathname.split("/").filter(Boolean);
 
   return (
@@ -36,22 +45,28 @@ function RouteComponent() {
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
-
             <Breadcrumb>
               <BreadcrumbList>
                 {paths.map((path, index) => {
                   const lastPath = index + 1 === paths.length;
+                  const href = "/" + paths.slice(0, index + 1).join("/");
 
                   return (
-                    <Fragment>
+                    <Fragment key={path + index}>
                       <BreadcrumbItem>
-                        <BreadcrumbPage
-                          className={`capitalize ${lastPath ? "font-bold" : ""}`}
-                        >
-                          {path}
-                        </BreadcrumbPage>
+                        {lastPath ? (
+                          <BreadcrumbPage className="capitalize font-bold">
+                            {path}
+                          </BreadcrumbPage>
+                        ) : (
+                          <Link
+                            to={href as "/dashboard"}
+                            className="capitalize text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {path}
+                          </Link>
+                        )}
                       </BreadcrumbItem>
-
                       {!lastPath && (
                         <BreadcrumbSeparator className="hidden md:block" />
                       )}
@@ -62,7 +77,6 @@ function RouteComponent() {
             </Breadcrumb>
           </div>
         </header>
-
         <Outlet />
       </SidebarInset>
     </SidebarProvider>

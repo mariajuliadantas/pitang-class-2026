@@ -9,13 +9,23 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 export function SignupForm({
   className,
+  onSuccess,
   ...props
-}: React.ComponentProps<"form">) {
+}: React.ComponentProps<"form"> & {
+  onSuccess: () => void;
+}) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    toast.success("Account created! Please sign in.");
+    onSuccess();
+  }
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Create your account</h1>
